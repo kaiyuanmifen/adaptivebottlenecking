@@ -117,7 +117,7 @@ class ACModel(nn.Module, torch_ac.RecurrentACModel):
 
         #####quantization
         self.args=args
-        self.QuantizerFunction=QuantizerFunction(64,CodebookSize=96,args=args,N_factors=[1,2,4])
+        self.QuantizerFunction=QuantizerFunction(input_dims=64,CodebookSize=16,Method=args.Method,N_factors=[1,2,4])
         # Initialize parameters correctly
         self.apply(init_params)
 
@@ -143,7 +143,12 @@ class ACModel(nn.Module, torch_ac.RecurrentACModel):
         x = self.image_conv(x)
         x = x.reshape(x.shape[0], -1)
 
+   
+        
+        x=x.unsqueeze(1)
+
         x,ExtraLoss,att_scores=self.QuantizerFunction(x)
+        x=x.squeeze(1)
 
         if self.use_memory:
             hidden = (memory[:, :self.semi_memory_size], memory[:, self.semi_memory_size:])

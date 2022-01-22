@@ -31,7 +31,7 @@ echo "N_agents $N_agents"
 
 echo "Method $Method"
 
-Rounds=($(seq 1 1 5))
+Rounds=($(seq 1 1 10))
 
 
 

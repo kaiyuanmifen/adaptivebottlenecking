@@ -16,12 +16,6 @@ import numpy as np
 
 import argparse
 
-
-from transformer_DL import TransformerEncoder,TransformerEncoderLayer
-
-
-from quantize import Quantize
-
 from QuantizerFunction import QuantizerFunction
 
 parser = argparse.ArgumentParser()
@@ -170,7 +164,7 @@ class ActorCritic_attention(nn.Module):
 		self.alpha=0.1###hyperparameter control penalizaing term for using more factors
 
 		#self.QuantizeFunctions=nn.ModuleList([Quantize(HIDDEN_DIM,self.CodebookSize,N_factor) for N_factor in self.N_factors])	
-		self.QuantizeFunctions=QuantizerFunction(HIDDEN_DIM,48,self.args)
+		self.QuantizeFunctions=QuantizerFunction(HIDDEN_DIM,CodebookSize=16,Method=self.args.Method,N_factors=[1,2,4])
 		###keys for the quantization modules 
 
 		self.quantization_keys=torch.nn.Parameter(torch.randn(self.N_tightness_levels,1,HIDDEN_DIM))

@@ -53,10 +53,12 @@
 declare -a All_data=("Drone_communication")
 #declare -a All_N_agents=(1 5 20)
 declare -a All_Methods=("Adaptive_Hierachical" "Adaptive_Quantization" "Quantization" "Original")
-#declare -a All_Methods=("Quantization")
+#declare -a All_Methods=("Quantization" )
 
 
 declare -a All_N_agents=(5 10)
+#declare -a All_N_agents=(5)
+
 #declare -a All_Methods=("Adaptive_Hierachical")
 
 
@@ -77,7 +79,7 @@ do
 		do
 
 
-			./Submit_slurm_train_MARL_Drone_Communication.sh $data $N_agents $Method 
+			sbatch Submit_slurm_train_MARL_Drone_Communication.sh $data $N_agents $Method 
 		done
 	done
 done

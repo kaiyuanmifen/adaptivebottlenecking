@@ -71,7 +71,7 @@ parser.add_argument('--load_action_dim', action='store_true', default=False,
 ####argguments for quantization
 parser.add_argument('--Quantization', action='store_true', default=False,
                     help='if quantize the edge information.')
-parser.add_argument('--n_codebook_embedding', type=int, default=512)
+parser.add_argument('--n_codebook_embedding', type=int, default=128)
 parser.add_argument('--codebook_loss_weight', type=float, default=1)
 parser.add_argument('--Quantization_method',type=str,default="None",help="method used for quantizaiton")
 parser.add_argument('--n_quuantization_segments', type=int, default=1)
@@ -84,6 +84,7 @@ parser.add_argument('--RatioDataForTraining', type=float, default=1.,
 
 
 args = parser.parse_args()
+
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
 now = datetime.datetime.now()

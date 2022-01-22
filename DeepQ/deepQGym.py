@@ -5,31 +5,17 @@ import torch.optim as optim
 import numpy as np
 import gym
 #from torch.utils.tensorboard import SummaryWriter
-import gym_lunar_lander_custom
+#import gym_lunar_lander_custom
 import argparse
 import torch
 
 
 from QuantizerFunction import QuantizerFunction
 
-def query_environment(name):
-  env = gym.make(name)
-  spec = gym.spec(name)
-  print(f"Action Space: {env.action_space}")
-  print(f"Observation Space: {env.observation_space}")
-  print(f"Max Episode Steps: {spec.max_episode_steps}")
-  print(f"Nondeterministic: {spec.nondeterministic}")
-  print(f"Reward Range: {env.reward_range}")
-  print(f"Reward Threshold: {spec.reward_threshold}")
-
-
-query_environment("LunarLander-v2")
 n_actions = 4
 input_dims = 24
 
 #writer = SummaryWriter()
-
-
 
 
 
@@ -65,7 +51,7 @@ class DeepQNetwork_Q(nn.Module):
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
         self.fc3 = nn.Linear(self.fc2_dims, self.n_actions)
 
-        self.QuantizerFunction=QuantizerFunction(*self.input_dims,args)
+        self.QuantizerFunction=QuantizerFunction(*self.input_dims,CodebookSize=16,Method=args.Method)
 
 
         self.args=args
@@ -75,8 +61,10 @@ class DeepQNetwork_Q(nn.Module):
         self.to(self.device)
 
     def forward(self, state):
-
+        state=state.unsqueeze(1)
         state,CBloss,att_scores=self.QuantizerFunction(state)
+        state=state.squeeze(1)
+
 
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
@@ -85,32 +73,6 @@ class DeepQNetwork_Q(nn.Module):
         return actions,CBloss,att_scores
 
 
-
-
-class DeepQNetwork(nn.Module):
-    def __init__(self, lr, input_dims, fc1_dims, fc2_dims,
-                 n_actions):
-        super(DeepQNetwork, self).__init__()
-        self.input_dims = input_dims
-        self.fc1_dims = fc1_dims
-        self.fc2_dims = fc2_dims
-        self.n_actions = n_actions
-        self.fc1 = nn.Linear(*self.input_dims, self.fc1_dims)
-        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
-        self.fc3 = nn.Linear(self.fc2_dims, self.n_actions)
-
-        self.optimizer = optim.Adam(self.parameters(), lr=lr)
-        self.loss = nn.MSELoss()
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
-        self.to(self.device)
-
-    def forward(self, state):
-
-        x = F.relu(self.fc1(state))
-        x = F.relu(self.fc2(x))
-        actions = self.fc3(x)
-
-        return actions
 
 
 class Agent():
@@ -132,9 +94,6 @@ class Agent():
                                   fc1_dims=256, fc2_dims=256,args=args)
 
       
-
-        self.Q_next = DeepQNetwork(lr, n_actions=n_actions, input_dims=input_dims,
-                                  fc1_dims=64, fc2_dims=64)
 
         self.state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
         self.new_state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
@@ -265,7 +224,7 @@ if __name__ == '__main__':
         help='which data to use')
 
 
-    parser.add_argument('--Method', type=str, default="DeepQ",
+    parser.add_argument('--Method', type=str, default="Original",
     help='method name')
 
 
@@ -286,12 +245,12 @@ if __name__ == '__main__':
 
     Saving_Interval=10
 
-    if args.data=="LunarLander-v2":
+    # if args.data=="LunarLander-v2":
         
-        env_testOOD = gym.make('LunarLanderOOD-v0')    
-    else:
+    #     env_testOOD = gym.make('LunarLanderOOD-v0')    
+    # else:
 
-        env_testOOD = gym.make(args.data)
+    env_testOOD = gym.make(args.data)
 
     agent = Agent(gamma=0.99, epsilon=1.0, batch_size=64, n_actions=action_space, eps_end=0.01,
                   input_dims=[ObservationSpace], lr=0.001,args=args)
